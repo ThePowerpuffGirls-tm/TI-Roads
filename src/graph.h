@@ -8,22 +8,35 @@ class Graph
     //Storage for edges and vertices
     std::unordered_map<int, std::vector<int>> mapGraph;
     int numVertices;
+    int numEdges;
 
     public:
     //ctors
-    Graph(int _vertices);                           //Check?
-    ~Graph();                                       //Check?
+    Graph();
+    
+    Graph(int _vertices, int _edges);           //Dunno if we need this                         //Check?
+    ~Graph();                                                                                   //Check?
+
+    int V();
+    int E();
 
     //Other functions
-    void insertEdge(int from, int to);              //Check?
-    bool isEdge(int from, int to);                  //Check?
-    std::vector<int> getAdjacent(int vertex);       //Check?
+    void insertEdge(int from, int to);                                                          //Check?
+    bool isEdge(int from, int to);                                                              //Check?
+    std::vector<int> getAdjacent(int vertex);                                                   //Check?
 
 };
 
-Graph::Graph(int _vertices)
+Graph::Graph()
+{
+    numVertices = 0;
+    numEdges = 0;
+}
+
+Graph::Graph(int _vertices, _edges)     //Do we need this?
 {
     numVertices = _vertices;
+    numEdges = _edges;
 }
 
 Graph::~Graph()
@@ -34,9 +47,13 @@ Graph::~Graph()
 void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
+    if(!mapGraph.count(from))       //Vertex does not exist.
+        numVertices++
     mapGraph[from].push_back(to);
 
     //Create another edge from 'to' to 'from'
+    if(!mapGraph.count(to))         //Other vertex does not exist.
+        numVertices++;
     mapGraph[to].push_back(from); 
 }
 
