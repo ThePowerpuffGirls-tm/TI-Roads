@@ -33,7 +33,7 @@ Graph::Graph()
     numEdges = 0;
 }
 
-Graph::Graph(int _vertices, _edges)     //Do we need this?
+Graph::Graph(int _vertices, int _edges)     //Do we need this?
 {
     numVertices = _vertices;
     numEdges = _edges;
@@ -48,7 +48,7 @@ void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads 
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
     if(!mapGraph.count(from))       //Vertex does not exist.
-        numVertices++
+        numVertices++;
     mapGraph[from].push_back(to);
 
     //Create another edge from 'to' to 'from'
