@@ -44,6 +44,12 @@ Graph::~Graph()
     mapGraph.clear();
 }
 
+//Returns the number of vertices
+int Graph::V()  { return this->numVertices; }
+//Returns the number of edges
+int Graph::E()  { return this->numEdges;    }  
+
+//Creates an edge between two vertices, inserts vertex if it does not already exist.
 void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
@@ -59,6 +65,7 @@ void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads 
     numEdges++;
 }
 
+//Returns a vector of all adjacent vertices
 std::vector<int> Graph::getAdjacent(int vertex)
 {
     //Vertex has no adjacent vertices
@@ -68,6 +75,7 @@ std::vector<int> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
+//Returns true if there exists an edge between 'to' and 'from'
 bool Graph::isEdge(int from, int to)
 {
     //Go to the 'from' node, and search it's vector for 'to'
