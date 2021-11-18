@@ -55,6 +55,8 @@ void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads 
     if(!mapGraph.count(to))         //Other vertex does not exist.
         numVertices++;
     mapGraph[to].push_back(from); 
+
+    numEdges++;
 }
 
 std::vector<int> Graph::getAdjacent(int vertex)
