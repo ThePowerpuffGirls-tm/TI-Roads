@@ -8,7 +8,7 @@ void readFile();
 
 int main()
 {
-
+    readFile();
 }
 
 void readFile()
@@ -24,6 +24,7 @@ void readFile()
     }
 
     int from, to, space;
+    int i = 0;
     while(reader.is_open())
     {
         getline(reader, newLine);
@@ -31,8 +32,7 @@ void readFile()
         from = stoi(newLine.substr(0, space));
         to = stoi(newLine.substr(space+1));
 
-
-
     }
+    reader.close();
 
 }
