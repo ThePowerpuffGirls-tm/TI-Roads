@@ -25,10 +25,6 @@ class Graph
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<int> getAdjacent(int vertex);                                                   //Check?
 
-    // Biconnectivity functions
-    bool isBC();
-    bool isConnected();
-    int findAP();
 };
 
 Graph::Graph()
