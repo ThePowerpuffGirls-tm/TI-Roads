@@ -5,26 +5,30 @@
 class Graph
 {
 
-    //Storage for edges and vertices
+    // Storage for edges and vertices
     std::unordered_map<int, std::vector<int>> mapGraph;
     int numVertices;
     int numEdges;
 
     public:
-    //ctors
+    // Constructors and destructors
     Graph();
-    
     Graph(int _vertices, int _edges);           //Dunno if we need this                         //Check?
     ~Graph();                                                                                   //Check?
 
+    // Accessors
     int V();
     int E();
 
-    //Other functions
+    // Graph functions
     void insertEdge(int from, int to);                                                          //Check?
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<int> getAdjacent(int vertex);                                                   //Check?
 
+    // Biconnectivity functions
+    bool isBC();
+    bool isConnected();
+    int findAP();
 };
 
 Graph::Graph()
@@ -46,6 +50,7 @@ Graph::~Graph()
 
 //Returns the number of vertices
 int Graph::V()  { return this->numVertices; }
+
 //Returns the number of edges
 int Graph::E()  { return this->numEdges;    }  
 
@@ -65,16 +70,6 @@ void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads 
     numEdges++;
 }
 
-//Returns a vector of all adjacent vertices
-std::vector<int> Graph::getAdjacent(int vertex)
-{
-    //Vertex has no adjacent vertices
-    if(mapGraph[vertex].size() == 0)
-        return {};
-
-    return mapGraph[vertex];
-}
-
 //Returns true if there exists an edge between 'to' and 'from'
 bool Graph::isEdge(int from, int to)
 {
@@ -83,4 +78,14 @@ bool Graph::isEdge(int from, int to)
 
     //If 'to' is in the vector, then there is an edge.
     return (it != mapGraph[from].end());
+}
+
+//Returns a vector of all adjacent vertices
+std::vector<int> Graph::getAdjacent(int vertex)
+{
+    //Vertex has no adjacent vertices
+    if(mapGraph[vertex].size() == 0)
+        return {};
+
+    return mapGraph[vertex];
 }
