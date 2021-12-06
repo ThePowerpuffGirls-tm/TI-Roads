@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <queue>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -28,7 +29,8 @@ class Graph
 
     // Shortest s-t path
     bool bfs(int src, int dest, int parent[], int distance[]);
-    void bfsPath(int src, int dest);
+    bool dfs(int src, int dest, int parent[], int distance[]);
+    void stPath(int src, int dest);
 };
 
 Graph::Graph()
@@ -122,14 +124,46 @@ bool Graph::bfs(int src, int dest, int parent[], int distance[]) {
     return false;
 }
 
-void Graph::bfsPath(int src, int dest) {
+bool dfs(int src, int dest, int parent[], int distance[]) {
+    std::stack<int> s;
+    bool* visited = new bool[numVertices] {false};
+    std::fill(parent, parent + numVertices, -1);
+    std::fill(distance, distance + numVertices, INT_MAX);
+
+    s.push(src);
+    visited[src] = true;
+    distance[src] = 0;
+
+    while (!s.empty()) {
+        int curr = s.front();
+        s.pop();
+
+        for (int i : mapGraph[curr]) {
+            if (!visited[i]) {
+                s.push(i);
+                visited[i] = true;
+                distance[i] = distance[curr] + 1;
+                parent[i] = curr;
+
+                if (i == dest) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    delete[] visited;
+    return false;
+}
+
+void Graph::stPath(int src, int dest) {
     int* parent = new int[numVertices];
     int* distance = new int[numVertices];
 
     if (!bfs(src, dest, parent, distance)) {
         return;
     }
-    
+
     delete[] parent;
     delete[] distance;
 }
