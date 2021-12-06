@@ -135,7 +135,7 @@ bool dfs(int src, int dest, int parent[], int distance[]) {
     distance[src] = 0;
 
     while (!s.empty()) {
-        int curr = s.front();
+        int curr = s.top();
         s.pop();
 
         for (int i : mapGraph[curr]) {
