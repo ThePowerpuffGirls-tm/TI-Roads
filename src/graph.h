@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -25,6 +26,9 @@ class Graph
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<int> getAdjacent(int vertex);                                                   //Check?
 
+    // Shortest s-t path
+    bool bfs(int src, int dest, int parent[], int distance[]);
+    void bfsPath(int src, int dest);
 };
 
 Graph::Graph()
@@ -84,4 +88,48 @@ std::vector<int> Graph::getAdjacent(int vertex)
         return {};
 
     return mapGraph[vertex];
+}
+
+bool Graph::bfs(int src, int dest, int parent[], int distance[]) {
+    std::queue<int> q;
+    bool* visited = new bool[numVertices] {false};
+    std::fill(parent, parent + numVertices, -1);
+    std::fill(distance, distance + numVertices, INT_MAX);
+
+    q.push(src);
+    visited[src] = true;
+    distance[src] = 0;
+
+    while (!q.empty()) {
+        int curr = q.front();
+        q.pop();
+
+        for (int i : mapGraph[curr]) {
+            if (!visited[i]) {
+                q.push(i);
+                visited[i] = true;
+                distance[i] = distance[curr] + 1;
+                parent[i] = curr;
+
+                if (i == dest) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    delete[] visited;
+    return false;
+}
+
+void Graph::bfsPath(int src, int dest) {
+    int* parent = new int[numVertices];
+    int* distance = new int[numVertices];
+
+    if (!bfs(src, dest, parent, distance)) {
+        return;
+    }
+
+    delete[] parent;
+    delete[] distance;
 }
