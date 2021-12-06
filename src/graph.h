@@ -129,7 +129,7 @@ void Graph::bfsPath(int src, int dest) {
     if (!bfs(src, dest, parent, distance)) {
         return;
     }
-
+    
     delete[] parent;
     delete[] distance;
 }
