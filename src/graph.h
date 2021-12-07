@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <climits>
 #include <queue>
 #include <stack>
 #include <unordered_map>
@@ -124,7 +125,7 @@ bool Graph::bfs(int src, int dest, int parent[], int distance[]) {
     return false;
 }
 
-bool dfs(int src, int dest, int parent[], int distance[]) {
+bool Graph::dfs(int src, int dest, int parent[], int distance[]) {
     std::stack<int> s;
     bool* visited = new bool[numVertices] {false};
     std::fill(parent, parent + numVertices, -1);
