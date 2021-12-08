@@ -28,8 +28,8 @@ class Graph
     std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
 
     // Shortest s-t path
-    std::vector<int> shortestPath(int src);
-    void bellmanFord(int src, int dest);
+    std::vector<int> dijkstra(int src);
+    std::vector<int> bellmanFord(int src);
 };
 
 Graph::Graph()
@@ -91,15 +91,12 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
-void Graph::bellmanFord(int src, int dest)
+std::vector<int> Graph::bellmanFord(int src)
 {
     // Step 1 - declare distance and parent arrays and initialize elements accordingly
-    int* distance = new int[numVertices];
-    std::fill(distance, distance + numVertices, INT_MAX);
+    std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance[src] = 0;
-    
-    int* parent = new int[numVertices];
-    std::fill(parent, parent + numVertices, -1);
+    std::vector<int> parent(mapGraph.size(), -1);
 
     // Step 2 - relax all edges |V| - 1 times
     for (int i = 0; i < numVertices - 1; i++)
@@ -115,15 +112,14 @@ void Graph::bellmanFord(int src, int dest)
     }
 
     // Skip step 3 since there are no negative weights in the graph
-    delete[] distance;
-    delete[] parent;
+    return distance;
 }
 
 /*This algorithm finds the shortest path from the source node to all vertices.
     Uses Dijkstra's shortest path algorithm
             Sources: Aman's Lecture Slides
                      https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
-std::vector<int> Graph::shortestPath(int src)
+std::vector<int> Graph::dijkstra(int src)
 {
     std::set<int> visited;      //Set of visited nodes.
     std::set<int> unvisited;    //Set of unvisited nodes.
