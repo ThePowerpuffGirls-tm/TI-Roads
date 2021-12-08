@@ -1,12 +1,13 @@
 #include <algorithm>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 class Graph
 {
 
     // Storage for edges and vertices
-    std::unordered_map<int, std::vector<int>> mapGraph;
+    std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
     int numEdges;
 
@@ -21,9 +22,9 @@ class Graph
     int E();
 
     // Graph functions
-    void insertEdge(int from, int to);                                                          //Check?
+    void insertEdge(int from, int to, int weight);                                              //Check?
     bool isEdge(int from, int to);                                                              //Check?
-    std::vector<int> getAdjacent(int vertex);                                                   //Check?
+    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                                   //Check?
 
 };
 
@@ -51,17 +52,17 @@ int Graph::V()  { return this->numVertices; }
 int Graph::E()  { return this->numEdges;    }  
 
 //Creates an edge between two vertices, inserts vertex if it does not already exist.
-void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads can go both ways
+void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
     if(!mapGraph.count(from))       //Vertex does not exist.
         numVertices++;
-    mapGraph[from].push_back(to);
+    mapGraph[from].push_back(std::make_pair(to, weight));
 
     //Create another edge from 'to' to 'from'
     if(!mapGraph.count(to))         //Other vertex does not exist.
         numVertices++;
-    mapGraph[to].push_back(from); 
+    mapGraph[to].push_back(std::make_pair(from, weight)); 
 
     numEdges++;
 }
@@ -77,7 +78,7 @@ bool Graph::isEdge(int from, int to)
 }
 
 //Returns a vector of all adjacent vertices
-std::vector<int> Graph::getAdjacent(int vertex)
+std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 {
     //Vertex has no adjacent vertices
     if(mapGraph[vertex].size() == 0)
