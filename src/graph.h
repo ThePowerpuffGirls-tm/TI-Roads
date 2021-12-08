@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include<iostream>
+#include<chrono>
 
 class Graph
 {
@@ -93,6 +95,9 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 
 std::vector<int> Graph::bellmanFord(int src)
 {
+    //Timer Start
+    auto start = std::chrono::high_resolution_clock::now();
+
     // Step 1 - declare distance and parent arrays and initialize elements accordingly
     std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance[src] = 0;
@@ -112,6 +117,13 @@ std::vector<int> Graph::bellmanFord(int src)
     }
 
     // Skip step 3 since there are no negative weights in the graph
+
+    //Timer End
+    
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    std::cout << duration.count() << std::endl;
+    
     return distance;
 }
 
@@ -121,6 +133,9 @@ std::vector<int> Graph::bellmanFord(int src)
                      https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
 std::vector<int> Graph::dijkstra(int src)
 {
+    //Timer Start
+    auto start = std::chrono::high_resolution_clock::now();
+
     std::set<int> visited;      //Set of visited nodes.
     std::set<int> unvisited;    //Set of unvisited nodes.
 
@@ -160,5 +175,12 @@ std::vector<int> Graph::dijkstra(int src)
                 distance.at(p.first) = currDistance;
         }
     }
+
+    //Timer End
+    
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    std::cout << duration.count() << std::endl;
+    
     return distance;
 }
