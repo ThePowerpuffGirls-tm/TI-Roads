@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <limits.h>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -6,7 +7,6 @@
 
 class Graph
 {
-
     // Storage for edges and vertices, adjancency list implementation
     std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
@@ -27,8 +27,9 @@ class Graph
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
 
+    // Shortest s-t path
     std::vector<int> shortestPath(int src);
-
+    void bellmanFord(int src, int dest);
 };
 
 Graph::Graph()
@@ -90,6 +91,33 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
+void Graph::bellmanFord(int src, int dest)
+{
+    // Step 1 - declare distance and parent arrays and initialize elements accordingly
+    int* distance = new int[numVertices];
+    std::fill(distance, distance + numVertices, INT_MAX);
+    distance[src] = 0;
+    
+    int* parent = new int[numVertices];
+    std::fill(parent, parent + numVertices, -1);
+
+    // Step 2 - relax all edges |V| - 1 times
+    for (int i = 0; i < numVertices - 1; i++)
+    {
+        for (std::pair<int, int> j : mapGraph[i])
+        {
+            if (distance[i] != INT_MAX && distance[i] + j.second < distance[j.first])
+            {
+                distance[j.first] = distance[i] + j.second;
+                parent[j.first] = i;
+            }
+        }
+    }
+
+    // Skip step 3 since there are no negative weights in the graph
+    delete[] distance;
+    delete[] parent;
+}
 
 /*This algorithm finds the shortest path from the source node to all vertices.
     Uses Dijkstra's shortest path algorithm
