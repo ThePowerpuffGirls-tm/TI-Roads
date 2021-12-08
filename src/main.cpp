@@ -15,6 +15,8 @@ int main()
     readFile(graph, filename);
 
     int selection = -1;
+    int from, to;
+    std::vector<int> distances;
     while(selection != 0)
     {
 
@@ -23,15 +25,24 @@ int main()
         std::cout << "2. Bellman-Ford Algorithm" << std::endl;
         std::cin >> selection;
 
-        if(selection == 1)
+        if(selection == 1)  //run dijkstras
         {
-            //run dijkstras
+            std::cout << "Starting Vertex: ";
+            std::cin >> from;
+            std::cout << "Destination Vertex: ";
+            std::cin >> to;
+            distances = graph.dijkstra(from);
         }
-        else if(selection == 2)
+        else if(selection == 2) //run bellman-ford
         {
-            //run bellman-ford
+            std::cout << "Starting Vertex: ";
+            std::cin >> from;
+            std::cout << "Destination Vertex: ";
+            std::cin >> to;
+            distances = graph.bellmanFord(from);
+            std::cout << distances[to] << std::endl;
         }
-        else if(selection == 0)
+        else if(selection == 0) //End program
         {
             break;
         }
@@ -41,7 +52,7 @@ int main()
         }
 
         //whitespace/formatting
-        std::cout << selection << std::endl;
+        //std::cout << selection << std::endl;
 
     }
 }
@@ -69,12 +80,11 @@ void readFile(Graph& graph, std::string& filename)
         if(!graph.isEdge(from, to))
         {
             graph.insertEdge(from, to, rngWeight);
-            graph.insertEdge(to, from, rngWeight);
         }
     }
     //auto stop = std::chrono::high_resolution_clock::now();
     //auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-    //std::cout << duration.count() << std::endl;
+    //std::cout << "Time to run: " << duration.count() << "s" <<std::endl;
     reader.close();
 
 }
