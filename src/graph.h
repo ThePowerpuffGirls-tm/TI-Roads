@@ -1,15 +1,13 @@
 #include <algorithm>
-#include <climits>
-#include <queue>
-#include <stack>
+#include <limits.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 class Graph
 {
-
     // Storage for edges and vertices
-    std::unordered_map<int, std::vector<int>> mapGraph;
+    std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
     int numEdges;
 
@@ -24,14 +22,12 @@ class Graph
     int E();
 
     // Graph functions
-    void insertEdge(int from, int to);                                                          //Check?
+    void insertEdge(int from, int to, int weight);                                              //Check?
     bool isEdge(int from, int to);                                                              //Check?
-    std::vector<int> getAdjacent(int vertex);                                                   //Check?
+    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                                   //Check?
 
     // Shortest s-t path
-    bool bfs(int src, int dest, int parent[], int distance[]);
-    bool dfs(int src, int dest, int parent[], int distance[]);
-    void stPath(int src, int dest);
+    void bellmanFord(int src, int dest);
 };
 
 Graph::Graph()
@@ -58,17 +54,17 @@ int Graph::V()  { return this->numVertices; }
 int Graph::E()  { return this->numEdges;    }  
 
 //Creates an edge between two vertices, inserts vertex if it does not already exist.
-void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads can go both ways
+void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
     if(!mapGraph.count(from))       //Vertex does not exist.
         numVertices++;
-    mapGraph[from].push_back(to);
+    mapGraph[from].push_back(std::make_pair(to, weight));
 
     //Create another edge from 'to' to 'from'
     if(!mapGraph.count(to))         //Other vertex does not exist.
         numVertices++;
-    mapGraph[to].push_back(from); 
+    mapGraph[to].push_back(std::make_pair(from, weight)); 
 
     numEdges++;
 }
@@ -84,7 +80,7 @@ bool Graph::isEdge(int from, int to)
 }
 
 //Returns a vector of all adjacent vertices
-std::vector<int> Graph::getAdjacent(int vertex)
+std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 {
     //Vertex has no adjacent vertices
     if(mapGraph[vertex].size() == 0)
@@ -93,78 +89,30 @@ std::vector<int> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
-bool Graph::bfs(int src, int dest, int parent[], int distance[]) {
-    std::queue<int> q;
-    bool* visited = new bool[numVertices] {false};
-    std::fill(parent, parent + numVertices, -1);
-    std::fill(distance, distance + numVertices, INT_MAX);
-
-    q.push(src);
-    visited[src] = true;
-    distance[src] = 0;
-
-    while (!q.empty()) {
-        int curr = q.front();
-        q.pop();
-
-        for (int i : mapGraph[curr]) {
-            if (!visited[i]) {
-                q.push(i);
-                visited[i] = true;
-                distance[i] = distance[curr] + 1;
-                parent[i] = curr;
-
-                if (i == dest) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    delete[] visited;
-    return false;
-}
-
-bool Graph::dfs(int src, int dest, int parent[], int distance[]) {
-    std::stack<int> s;
-    bool* visited = new bool[numVertices] {false};
-    std::fill(parent, parent + numVertices, -1);
-    std::fill(distance, distance + numVertices, INT_MAX);
-
-    s.push(src);
-    visited[src] = true;
-    distance[src] = 0;
-
-    while (!s.empty()) {
-        int curr = s.top();
-        s.pop();
-
-        for (int i : mapGraph[curr]) {
-            if (!visited[i]) {
-                s.push(i);
-                visited[i] = true;
-                distance[i] = distance[curr] + 1;
-                parent[i] = curr;
-
-                if (i == dest) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    delete[] visited;
-    return false;
-}
-
-void Graph::stPath(int src, int dest) {
-    int* parent = new int[numVertices];
+void Graph::bellmanFord(int src, int dest)
+{
+    // Step 1 - declare distance and parent arrays and initialize elements accordingly
     int* distance = new int[numVertices];
+    std::fill(distance, distance + numVertices, INT_MAX);
+    distance[src] = 0;
+    
+    int* parent = new int[numVertices];
+    std::fill(parent, parent + numVertices, -1);
 
-    if (!bfs(src, dest, parent, distance)) {
-        return;
+    // Step 2 - relax all edges |V| - 1 times
+    for (int i = 0; i < numVertices - 1; i++)
+    {
+        for (std::pair<int, int> j : mapGraph[i])
+        {
+            if (distance[i] != INT_MAX && distance[i] + j.second < distance[j.first])
+            {
+                distance[j.first] = distance[i] + j.second;
+                parent[j.first] = i;
+            }
+        }
     }
 
-    delete[] parent;
+    // Skip step 3 since there are no negative weights in the graph
     delete[] distance;
+    delete[] parent;
 }
