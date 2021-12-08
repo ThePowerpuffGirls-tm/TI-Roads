@@ -1,12 +1,14 @@
 #include <algorithm>
+#include <limits.h>
+#include <set>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 class Graph
 {
-
-    // Storage for edges and vertices
-    std::unordered_map<int, std::vector<int>> mapGraph;
+    // Storage for edges and vertices, adjancency list implementation
+    std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
     int numEdges;
 
@@ -21,10 +23,13 @@ class Graph
     int E();
 
     // Graph functions
-    void insertEdge(int from, int to);                                                          //Check?
+    void insertEdge(int from, int to, int weight);                                              //Check?
     bool isEdge(int from, int to);                                                              //Check?
-    std::vector<int> getAdjacent(int vertex);                                                   //Check?
+    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
 
+    // Shortest s-t path
+    std::vector<int> dijkstra(int src);
+    std::vector<int> bellmanFord(int src);
 };
 
 Graph::Graph()
@@ -51,17 +56,17 @@ int Graph::V()  { return this->numVertices; }
 int Graph::E()  { return this->numEdges;    }  
 
 //Creates an edge between two vertices, inserts vertex if it does not already exist.
-void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads can go both ways
+void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
     if(!mapGraph.count(from))       //Vertex does not exist.
         numVertices++;
-    mapGraph[from].push_back(to);
+    mapGraph[from].push_back(std::make_pair(to, weight));
 
     //Create another edge from 'to' to 'from'
     if(!mapGraph.count(to))         //Other vertex does not exist.
         numVertices++;
-    mapGraph[to].push_back(from); 
+    mapGraph[to].push_back(std::make_pair(from, weight)); 
 
     numEdges++;
 }
@@ -70,18 +75,90 @@ void Graph::insertEdge(int from, int to)    //Currently a undirected map, roads 
 bool Graph::isEdge(int from, int to)
 {
     //Go to the 'from' node, and search it's vector for 'to'
-    auto it = std::find(mapGraph[from].begin(), mapGraph[from].end(), to);
+    auto it = std::find_if(mapGraph[from].begin(), mapGraph[from].end(), [&to](const std::pair<int, int>& element) {return element.first == to;});
 
     //If 'to' is in the vector, then there is an edge.
     return (it != mapGraph[from].end());
 }
 
 //Returns a vector of all adjacent vertices
-std::vector<int> Graph::getAdjacent(int vertex)
+std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 {
     //Vertex has no adjacent vertices
     if(mapGraph[vertex].size() == 0)
         return {};
 
     return mapGraph[vertex];
+}
+
+std::vector<int> Graph::bellmanFord(int src)
+{
+    // Step 1 - declare distance and parent arrays and initialize elements accordingly
+    std::vector<int> distance(mapGraph.size(), INT_MAX);
+    distance[src] = 0;
+    std::vector<int> parent(mapGraph.size(), -1);
+
+    // Step 2 - relax all edges |V| - 1 times
+    for (int i = 0; i < numVertices - 1; i++)
+    {
+        for (std::pair<int, int> j : mapGraph[i])
+        {
+            if (distance[i] != INT_MAX && distance[i] + j.second < distance[j.first])
+            {
+                distance[j.first] = distance[i] + j.second;
+                parent[j.first] = i;
+            }
+        }
+    }
+
+    // Skip step 3 since there are no negative weights in the graph
+    return distance;
+}
+
+/*This algorithm finds the shortest path from the source node to all vertices.
+    Uses Dijkstra's shortest path algorithm
+            Sources: Aman's Lecture Slides
+                     https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
+std::vector<int> Graph::dijkstra(int src)
+{
+    std::set<int> visited;      //Set of visited nodes.
+    std::set<int> unvisited;    //Set of unvisited nodes.
+
+    //All nodes initialized as unvisited.
+    for(int i = 0; i < mapGraph.size(); i++)
+        unvisited.insert(i);
+
+    //Distance initialized as 0 for src, and infinity for the rest.
+    std::vector<int> distance(mapGraph.size(), INT_MAX);
+    distance.at(src) = 0;
+
+    //While there are nodes left unvisited:
+    while(!unvisited.empty())
+    {
+        //For all unvisited nodes, find the smallest distance
+        int curr = *unvisited.begin();
+        for(auto i = unvisited.begin(); i != unvisited.end(); i++)
+        {
+            //Check distance values
+            if(distance.at(*i) < distance.at(curr))
+                curr = *i;          //Update distance if there exists a smaller distance
+        }
+
+        //Mark the unvisited node as visited
+        unvisited.erase(curr);
+        visited.insert(curr);
+
+        //For all adjacent nodes
+        auto adj = mapGraph.at(curr);
+        for(std::pair<int, int> p : adj)
+        {
+            //Check distance
+            int currDistance = distance.at(curr) + p.second;
+
+            //Perform relaxation if necessary
+            if(distance.at(p.first) > currDistance)
+                distance.at(p.first) = currDistance;
+        }
+    }
+    return distance;
 }
