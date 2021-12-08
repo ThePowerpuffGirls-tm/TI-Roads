@@ -3,10 +3,11 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <set>
 
 class Graph
 {
-    // Storage for edges and vertices
+    // Storage for edges and vertices, adjancency list implementation
     std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
     int numEdges;
@@ -24,9 +25,10 @@ class Graph
     // Graph functions
     void insertEdge(int from, int to, int weight);                                              //Check?
     bool isEdge(int from, int to);                                                              //Check?
-    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                                   //Check?
+    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
 
     // Shortest s-t path
+    std::vector<int> shortestPath(int src);
     void bellmanFord(int src, int dest);
 };
 
@@ -115,4 +117,52 @@ void Graph::bellmanFord(int src, int dest)
     // Skip step 3 since there are no negative weights in the graph
     delete[] distance;
     delete[] parent;
+}
+
+/*This algorithm finds the shortest path from the source node to all vertices.
+    Uses Dijkstra's shortest path algorithm
+            Sources: Aman's Lecture Slides
+                     https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
+std::vector<int> Graph::shortestPath(int src)
+{
+    std::set<int> visited;      //Set of visited nodes.
+    std::set<int> unvisited;    //Set of unvisited nodes.
+
+    //All nodes initialized as unvisited.
+    for(int i = 0; i < mapGraph.size(); i++)
+        unvisited.insert(i);
+
+    //Distance initialized as 0 for src, and infinity for the rest.
+    std::vector<int> distance(mapGraph.size(), INT_MAX);
+    distance.at(src) = 0;
+
+    //While there are nodes left unvisited:
+    while(!unvisited.empty())
+    {
+        //For all unvisited nodes, find the smallest distance
+        int curr = *unvisited.begin();
+        for(auto i = unvisited.begin(); i != unvisited.end(); i++)
+        {
+            //Check distance values
+            if(distance.at(*i) < distance.at(curr))
+                curr = *i;          //Update distance if there exists a smaller distance
+        }
+
+        //Mark the unvisited node as visited
+        unvisited.erase(curr);
+        visited.insert(curr);
+
+        //For all adjacent nodes
+        auto adj = mapGraph.at(curr);
+        for(std::pair<int, int> p : adj)
+        {
+            //Check distance
+            int currDistance = distance.at(curr) + p.second;
+
+            //Perform relaxation if necessary
+            if(distance.at(p.first) > currDistance)
+                distance.at(p.first) = currDistance;
+        }
+    }
+    return distance;
 }
