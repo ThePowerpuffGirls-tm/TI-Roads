@@ -15,6 +15,7 @@ int main()
     readFile(graph, filename);
 
     int selection = -1;
+    int from, to;
     while(selection != 0)
     {
 
@@ -23,15 +24,23 @@ int main()
         std::cout << "2. Bellman-Ford Algorithm" << std::endl;
         std::cin >> selection;
 
-        if(selection == 1)
+        if(selection == 1)  //run dijkstras
         {
-            //run dijkstras
+            std::cout << "Starting Vertex: ";
+            std::cin >> from;
+            std::cout << "Destination Vertex: ";
+            std::cin >> to;
+            graph.dijkstra(from);
         }
-        else if(selection == 2)
+        else if(selection == 2) //run bellman-ford
         {
-            //run bellman-ford
+            std::cout << "Starting Vertex: ";
+            std::cin >> from;
+            std::cout << "Destination Vertex: ";
+            std::cin >> to;
+            graph.bellmanFord(from);
         }
-        else if(selection == 0)
+        else if(selection == 0) //End program
         {
             break;
         }
@@ -41,7 +50,7 @@ int main()
         }
 
         //whitespace/formatting
-        std::cout << selection << std::endl;
+        //std::cout << selection << std::endl;
 
     }
 }
