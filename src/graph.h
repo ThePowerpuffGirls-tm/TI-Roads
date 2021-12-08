@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <limits.h>
+#include <set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <set>
 
 class Graph
 {
@@ -75,7 +75,7 @@ void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected
 bool Graph::isEdge(int from, int to)
 {
     //Go to the 'from' node, and search it's vector for 'to'
-    auto it = std::find(mapGraph[from].begin(), mapGraph[from].end(), to);
+    auto it = std::find_if(mapGraph[from].begin(), mapGraph[from].end(), [&to](const std::pair<int, int>& element) {return element.first == to;});
 
     //If 'to' is in the vector, then there is an edge.
     return (it != mapGraph[from].end());
