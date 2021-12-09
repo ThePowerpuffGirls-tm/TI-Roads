@@ -1,19 +1,22 @@
 #include <algorithm>
 #include <limits.h>
-#include <set>
-#include <unordered_map>
 #include <utility>
+#include <iostream>
+#include <chrono>
+#include <set>
+#include <queue>
+#include <unordered_map>
 #include <vector>
-#include<iostream>
-#include<chrono>
+
 
 class Graph
 {
+    private: 
     // Storage for edges and vertices, adjancency list implementation
     std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
     int numVertices;
     int numEdges;
-
+    
     public:
     // Constructors and destructors
     Graph();
@@ -29,6 +32,8 @@ class Graph
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
     
+    std::set<int> subset(int src, int degs);
+
     // Shortest s-t path
     std::vector<int> dijkstra(int src);
     std::vector<int> bellmanFord(int src);
@@ -75,7 +80,7 @@ void Graph::vertexCorrection(int largestID)
     for(int i = 0; i<extraVertices.size(); i++)
     {
         rngWeight = rand()%1584+2113;
-        insertEdge(i, (i+1)%extraVertices.size(), rngWeight);
+        insertEdge(extraVertices[i], extraVertices[(i+1)%extraVertices.size()], rngWeight);
     }
 
 
@@ -146,7 +151,6 @@ std::vector<int> Graph::bellmanFord(int src)
     // Skip step 3 since there are no negative weights in the graph
 
     //Timer End
-    
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run: " <<  duration.count() << "ms" << std::endl;
@@ -224,11 +228,11 @@ std::vector<int> Graph::dijkstra(int src)
                 }
             }
         }
-        if(counter%10000 == 0)
+        if(counter%10 == 0)
         {
             auto postAdd = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
-            std::cout << "Adding 10000 vertices: " << duration.count() << "ms" << std::endl;
+            std::cout << "Adding 10 vertices: " << duration.count() << "ms" << std::endl;
             preAdd = std::chrono::high_resolution_clock::now();
         }
     }
@@ -240,4 +244,68 @@ std::vector<int> Graph::dijkstra(int src)
     std::cout << "Time to run: " << duration.count() << "ms" << std::endl;
     
     return distance;
+}
+
+
+std::set<int> Graph::subset(int src, int degs)
+{
+    std::set<int> set;
+    std::queue<int> q;
+
+    //start from src
+    q.push(src);
+    set.insert(src);
+
+    int currLvlCount = 1;   //Tracks how many vertices are in the current level of BFS
+    int nextLvlCount = 0;   //Tracks how many vertices will be considered in the next level of BFS
+    int currLvl = 0;        //Tracks how many degrees away from the source we're currently at
+  
+    while(!q.empty())
+    {
+        //get/pop the front of the queue.
+        std::set<int> tempSet;
+        int curr = q.front();
+        std::vector<std::pair<int,int>> neighbors = mapGraph[curr];
+
+        q.pop();
+        currLvlCount--;
+
+        //push all unique adj. vertices into the queue
+        
+        for(int i = 0; i < neighbors.size(); i++)
+        {
+            int vertex = neighbors[i].first;
+
+            //If we haven't reached this vertex yet, add it to the queue and set
+            if(!set.count(vertex) && !tempSet.count(vertex)) 
+            {
+                q.push(vertex);
+                tempSet.insert(vertex);
+                nextLvlCount++;
+            }
+        }
+
+        //If we've traversed all vertices on this level, move to the next level
+        if(currLvlCount == 0)
+        {
+            currLvlCount = nextLvlCount;
+            nextLvlCount = 0;
+            currLvl++;
+
+            //If we're still within the acceptable range away from src, 
+            //merge the gathered vertices into the overall subset
+            if(currLvl <= degs)
+            {
+                std::set<int> uniSet;
+                set_union(set.begin(), set.end(), tempSet.begin(), tempSet.end(), std::inserter(uniSet, uniSet.begin()));
+                set.swap(uniSet);
+            }
+            else
+            {
+                break;   
+            }
+        }
+    }
+
+    return set;
 }

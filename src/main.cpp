@@ -48,7 +48,17 @@ int main()
         }
         else
         {
-            std::cout << "Invalid selection" << std::endl;
+            //std::cout << "Invalid selection" << std::endl;
+            std::cout << "Source Vertex: ";
+            std::cin >> from;
+            std::cout << "Max Degrees Away: ";
+            std::cin >> to;
+            std::set<int> set = graph.subset(from, to);
+            for(int i : set)
+            {
+                std::cout << i << ", ";
+            }
+            std::cout << std::endl;
         }
 
         //whitespace/formatting
@@ -74,23 +84,25 @@ void readFile(Graph& graph, std::string& filename)
     int largest = 0;
     while(std::getline(reader, newLine))
     {
+        //randomly generate the weight for this edge
         rngWeight = rand()%1584+2113;
+
+        //parse the line for the two vertices
         space = newLine.find('	');
         from = stoi(newLine.substr(0, space));
         to = stoi(newLine.substr(space+1));
+
+        //std::cout << from << " | " << to << std::endl;
         if(!graph.isEdge(from, to))
         {
             graph.insertEdge(from, to, rngWeight);
         }
 
         if(from > largest)
-        {
             largest = from;
-        }
         if(to > largest)
-        {
             largest = to;
-        }
+        
     }
 
     graph.vertexCorrection(largest);
