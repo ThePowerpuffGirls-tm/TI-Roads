@@ -75,9 +75,10 @@ void readFile(Graph& graph, std::string& filename)
     while(std::getline(reader, newLine))
     {
         rngWeight = rand()%1584+2113;
-        space = newLine.find(' ');
+        space = newLine.find('	');
         from = stoi(newLine.substr(0, space));
         to = stoi(newLine.substr(space+1));
+        std::cout << newLine << std::endl;
         if(!graph.isEdge(from, to))
         {
             graph.insertEdge(from, to, rngWeight);
