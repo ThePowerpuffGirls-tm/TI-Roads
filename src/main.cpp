@@ -4,9 +4,11 @@
 #include<string>
 #include<stdlib.h>
 #include<chrono>
+#include<stack>
 #include"graph.h"
 
 void readFile(Graph& graph,  std::string& filename);
+void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>& output, int from, int to);
 
 int main()
 {
@@ -16,8 +18,8 @@ int main()
 
     int selection = -1;
     int from, to, degs;
-    std::vector<int> dijkDist;
-    std::unordered_map<int, int> bfDist;
+    std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> output;
+    
     while(selection != 0)
     {
 
@@ -26,31 +28,29 @@ int main()
         std::cout << "2. Bellman-Ford Algorithm" << std::endl;
         std::cin >> selection;
 
+        if(selection == 0) {break;}
+
+        std::cout << "Starting Vertex: ";
+        std::cin >> from;
+        std::cout << "Degrees from Source: ";
+        std::cin >> degs;
+        std::cout << "Destination Vertex: ";
+        std::cin >> to;
+
+        if(to == from)
+        {
+            std::cout<< "Starting from destination (0 feet)" << std::endl;
+            std::cout << "Total distance traveled: 0 feet" << std::endl;
+        }
         if(selection == 1)  //run dijkstras
         {
-            std::cout << "Starting Vertex: ";
-            std::cin >> from;
-            std::cout << "Degrees from Source: ";
-            std::cin >> degs;
-            std::cout << "Destination Vertex: ";
-            std::cin >> to;
-            dijkDist = graph.dijkstra(from, degs);
-            std::cout << dijkDist[to] << std::endl;
+            output = graph.dijkstra(from, degs);
+            printOutput(output, from, to);
         }
         else if(selection == 2) //run bellman-ford
         {
-            std::cout << "Starting Vertex: ";
-            std::cin >> from;
-            std::cout << "Degrees from Source: ";
-            std::cin >> degs;
-            std::cout << "Destination Vertex: ";
-            std::cin >> to;
-            bfDist = graph.bellmanFord(from, degs);
-            std::cout << bfDist[to] << std::endl;
-        }
-        else if(selection == 0) //End program
-        {
-            break;
+            output = graph.bellmanFord(from, degs);
+            printOutput(output, from, to);
         }
         else
         {
@@ -119,5 +119,47 @@ void readFile(Graph& graph, std::string& filename)
     //auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
     //std::cout << "Time to run: " << duration.count() << "s" <<std::endl;
     reader.close();
+
+}
+
+void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>& output, int from, int to)
+{
+    std::unordered_map<int, int> distances = output.first;
+    std::unordered_map<int, int> predecessors = output.second;
+    std::stack<int> stack;
+
+    stack.push(to);
+    int parent = predecessors[to];
+    while(parent != -1)
+    {
+        std::cout << "pushed: " << parent << std::endl;
+        stack.push(parent);
+        parent = predecessors[parent];
+    }
+    
+    if(stack.top() != from)
+    {
+        std::cout << "No path between " << from << " and " << to << std::endl;
+    }
+    else
+    {
+        std::cout << "Shortest path from " << from << " to " << to << ": " << std::endl;
+        int curr, next, distance;
+
+        while(stack.size() > 1)
+        {
+            curr = stack.top();
+            stack.pop();
+            //std::cout << "Size of stack: " << stack.size() << std::endl;
+            next = stack.top();
+            distance = distances[next] - distances[curr];
+            //std::cout << "Next: " << distances[next] << " | Curr: " << distances[curr] << std::endl;
+            std::cout << "Direction:\t" << curr << "\tto\t" << next << "\t(" << distance << " feet)" << std::endl;
+        }
+
+        std::cout << "Total distance traveled: " << distances[to] << " feet" << std::endl;
+        std::cout << "\nEnd of path" << std::endl;
+        std::cout << "-----------------------------------------------\n" << std::endl;
+    }
 
 }

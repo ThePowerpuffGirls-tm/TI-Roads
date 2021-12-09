@@ -35,8 +35,8 @@ class Graph
     std::set<int> subset(int src, int degs);
 
     // Shortest s-t path
-    std::vector<int> dijkstra(int src, int degs);
-    std::unordered_map<int, int>  bellmanFord(int src, int degs);
+    std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> dijkstra(int src, int degs);
+    std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> bellmanFord(int src, int degs);
 
     //Misc.
     void vertexCorrection(int largestID);
@@ -122,7 +122,7 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
-std::unordered_map<int, int>  Graph::bellmanFord(int src, int degs)
+std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::bellmanFord(int src, int degs)
 {
     //Timer Start
     auto start = std::chrono::high_resolution_clock::now();
@@ -151,7 +151,7 @@ std::unordered_map<int, int>  Graph::bellmanFord(int src, int degs)
             std::vector<std::pair<int, int>> vector = mapGraph[i];
             for (std::pair<int, int> k : vector)
             {
-                if (distance[i] != INT_MAX && distance[i] + k.second < distance[k.first])
+                if (distance[i] != INT_MAX && distance[i] + k.second < distance[k.first])     
                 {
                     distance[k.first] = distance[i] + k.second;
                     parent[k.first] = i;
@@ -183,14 +183,14 @@ std::unordered_map<int, int>  Graph::bellmanFord(int src, int degs)
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run: " <<  duration.count() << "ms" << std::endl;
     
-    return distance;
+    return make_pair(distance, parent);
 }
 
 /*This algorithm finds the shortest path from the source node to all vertices.
     Uses Dijkstra's shortest path algorithm
             Sources: Aman's Lecture Slides
                      https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
-std::vector<int> Graph::dijkstra(int src, int degs)
+std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dijkstra(int src, int degs)
 {
     //Timer Start
     auto start = std::chrono::high_resolution_clock::now();
@@ -202,11 +202,25 @@ std::vector<int> Graph::dijkstra(int src, int degs)
     unvisited = subset(src, degs);
 
     //Distance initialized as 0 for src, and infinity for the rest.
+    std::unordered_map<int, int> distance;
+    std::unordered_map<int, int> predecessor;
+
+    for(int i : unvisited)
+    {   
+        distance[i] = INT_MAX;
+        predecessor[i] = -1;
+    }
+    distance[src] = 0;
+    predecessor[src] = -1;
+
+    /*
     std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance.at(src) = 0;
 
     std::vector<int> predecessor(mapGraph.size(), src);
     predecessor.at(src) = -1;
+    */
+
 
     //Start from src vertex
     unvisited.erase(src);
@@ -272,7 +286,7 @@ std::vector<int> Graph::dijkstra(int src, int degs)
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run: " << duration.count() << "ms" << std::endl;
     
-    return distance;
+    return make_pair(distance, predecessor);
 }
 
 
@@ -345,12 +359,12 @@ std::set<int> Graph::subset(int src, int degs)
             {
                 break;   
             }
-            
+            /*
             auto postAdd = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
             std::cout << "Adding Level " << currLvl << ": " << duration.count() << "ms" << std::endl;
             preAdd = std::chrono::high_resolution_clock::now();
-            
+            */
         }
 
     }
