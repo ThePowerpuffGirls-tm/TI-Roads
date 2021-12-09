@@ -125,7 +125,7 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::bellmanFord(int src, int degs)
 {
     //Timer Start
-    auto start = std::chrono::high_resolution_clock::now();
+    //auto start = std::chrono::high_resolution_clock::now();
 
     // Step 1 - declare distance and parent arrays and initialize elements accordingly
     std::unordered_map<int, int> distance;
@@ -179,10 +179,11 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::be
     // Skip step 3 since there are no negative weights in the graph
 
     //Timer End
+    /*
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run: " <<  duration.count() << "ms" << std::endl;
-    
+    */
     return make_pair(distance, parent);
 }
 
@@ -281,11 +282,11 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
     }
 
     //Timer End
-    
+    /*
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run: " << duration.count() << "ms" << std::endl;
-    
+    */
     return make_pair(distance, predecessor);
 }
 
@@ -306,7 +307,9 @@ std::set<int> Graph::subset(int src, int degs)
     int nextLvlCount = 0;   //Tracks how many vertices will be considered in the next level of BFS
     int currLvl = 0;        //Tracks how many degrees away from the source we're currently at
   
-    auto preAdd = std::chrono::high_resolution_clock::now();
+    //Individual Timer Start
+    //auto preAdd = std::chrono::high_resolution_clock::now();
+
     std::set<int> tempSet;
     while(!q.empty())
     {
@@ -359,6 +362,8 @@ std::set<int> Graph::subset(int src, int degs)
             {
                 break;   
             }
+
+            //Individual Timer End
             /*
             auto postAdd = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
@@ -370,9 +375,10 @@ std::set<int> Graph::subset(int src, int degs)
     }
 
     //Timer End
+    /*
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     std::cout << "Time to run subset: " << duration.count() << "ms" << std::endl;
-
+    */
     return set;
 }
