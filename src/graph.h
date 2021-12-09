@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <limits.h>
+#include <algorithm>
 #include <utility>
 #include <iostream>
 #include <chrono>
@@ -13,27 +13,27 @@ class Graph
 {
     private: 
     // Storage for edges and vertices, adjancency list implementation
-    std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph;
+
+    std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph; //Represents a weighted, undirected graph
     int numVertices;
     int numEdges;
     
     public:
     // Constructors and destructors
     Graph();
-    Graph(int _vertices, int _edges);           //Dunno if we need this                         //Check?
-    ~Graph();                                                                                   //Check?
+    Graph(int _vertices, int _edges); //Unused
+    ~Graph();                                                                                   
 
     // Accessors
     int V();
     int E();
 
     // Graph functions
-    void insertEdge(int from, int to, int weight);                                              //Check?
-    bool isEdge(int from, int to);                                                              //Check?
-    std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
+    void insertEdge(int from, int to, int weight);                                              
+    bool isEdge(int from, int to);     
+    std::set<int> subset(int src, int degs);                                                         
+    std::vector<std::pair<int, int>> getAdjacent(int vertex); //Unused                                   
     
-    std::set<int> subset(int src, int degs);
-
     // Shortest s-t path
     std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> dijkstra(int src, int degs);
     std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> bellmanFord(int src, int degs);
@@ -65,8 +65,18 @@ int Graph::V()  { return this->numVertices; }
 //Returns the number of edges
 int Graph::E()  { return this->numEdges;    }  
 
+/***
+ * Purpose: Fills up all consecutive vertices up to the largest vertex ID. 
+ *          All newly inserted vertices are added to a single disjoint component of the graph
+ *          that are connected in one large cycle. This is primarily used so that 
+ *          any and all integer values up to the largest ID can be referenced without issue.
+ * 
+ * Parameters: int largestID - the largest value the graph should be filled up to
+ * Return:     N/A
+ ***/
 void Graph::vertexCorrection(int largestID)
 {
+    //Identify which vertices to add
     std::vector<int> extraVertices;
     for(int i = 0; i < largestID; i++)
     {
@@ -76,18 +86,26 @@ void Graph::vertexCorrection(int largestID)
         }
     }
 
+    //Add those vertices and connect them to the disjoint section
     int rngWeight;
     for(int i = 0; i<extraVertices.size(); i++)
     {
         rngWeight = rand()%1584+2113;
         insertEdge(extraVertices[i], extraVertices[(i+1)%extraVertices.size()], rngWeight);
     }
-
-
 }
 
-//Creates an edge between two vertices, inserts vertex if it does not already exist.
-void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
+
+/***
+ * Purpose: Creates an edge between two vertices, inserts vertex if it does not already exist.
+ *          This is done by updating the adjacency list of both vertices for the undirected graph.
+ * Parameters:  int from - source vertex
+ *              int to - destination vertex
+ *              int weight - edge weight between the vertices
+ * Return:      N/A
+ ***/
+
+void Graph::insertEdge(int from, int to, int weight) 
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
     if(mapGraph[from].size() == 0)       //Vertex does not exist.
@@ -102,7 +120,12 @@ void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected
     numEdges++;
 }
 
-//Returns true if there exists an edge between 'to' and 'from'
+/***
+ * Purpose: Check to see if there's an edge between the two given vertices
+ * Parameters:  int from - Source vertex
+ *              int to   - Destination vertex
+ * Return:      true if there exists an edge between 'to' and 'from', false otherwise.
+ ***/
 bool Graph::isEdge(int from, int to)
 {
     //Go to the 'from' node, and search it's vector for 'to'
@@ -112,7 +135,11 @@ bool Graph::isEdge(int from, int to)
     return (it != mapGraph[from].end());
 }
 
-//Returns a vector of all adjacent vertices
+/***
+ * Purpose: Gets the list of all vertices adjacent to the target vertex
+ * Parameters: int vertex - the target vertex.
+ * Return:     A vector of all <vertex, weight> pairs representing all vertices adjacent to the target
+ ***/
 std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
 {
     //Vertex has no adjacent vertices
@@ -122,6 +149,16 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
+/***
+ * Purpose: Uses the Bellman-Ford algorithm to find the shortest path from a source vertex to all other
+ *          vertices within x degrees/edges from the source vertex. This function utilizes subset()
+ *          function to generate a subset of all vertices x degrees from the source and applies the
+ *          algorithm to the returned subset.
+ * Parameters: int src - Source vertex
+ *             int degs - the maximum amount of edges/degrees away from the Source vertex to look from
+ * Return:     A pair of maps <distances, predecessors> representing the table of values generated by
+ *             the Bellman-Ford algorithm. 
+ ***/
 std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::bellmanFord(int src, int degs)
 {
     //Timer Start
@@ -138,11 +175,6 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::be
     }
     distance[src] = 0;
 
-/*
-    std::vector<int> distance(mapGraph.size(), INT_MAX);
-    distance[src] = 0;
-    std::vector<int> parent(mapGraph.size(), -1);
-*/    
     // Step 2 - relax all edges |V| - 1 times
     for (int i = 0; i < sub.size() - 1; i++)
     {
@@ -159,22 +191,6 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::be
             }
         }
     }
-    /*
-    for (int i = 0; i < numVertices - 1; i++)
-    {
-        for (auto j : mapGraph)
-        {
-            for (std::pair<int, int> k : j.second)
-            {
-                if (distance[j.first] != INT_MAX && distance[j.first] + k.second < distance[k.first])
-                {
-                    distance[k.first] = distance[j.first] + k.second;
-                    parent[k.first] = j.first;
-                }
-            }
-        }
-    }
-    */
 
     // Skip step 3 since there are no negative weights in the graph
 
@@ -187,14 +203,25 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::be
     return make_pair(distance, parent);
 }
 
-/*This algorithm finds the shortest path from the source node to all vertices.
-    Uses Dijkstra's shortest path algorithm
-            Sources: Aman's Lecture Slides
-                     https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
+
+/***
+ * Purpose: Uses Dijkstra's algorithm to find the shortest path from a source vertex to all other
+ *          vertices within x degrees/edges from the source vertex. This function utilizes subset()
+ *          to generate a subset of all vertices x degrees from the source and applies the
+ *          algorithm to the returned subset.
+ * Parameters: int src - Source vertex
+ *             int degs - the maximum amount of edges/degrees away from the Source vertex to look from
+ * Return:     A pair of maps <distances, predecessors> representing the table of values generated by
+ *             Dijkstra's algorithm. 
+ ***/
+/*
+References Used:    Aman's Lecture Slides
+                    https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ 
+*/
 std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dijkstra(int src, int degs)
 {
     //Timer Start
-    auto start = std::chrono::high_resolution_clock::now();
+    //auto start = std::chrono::high_resolution_clock::now();
 
     std::set<int> visited;      //Set of visited nodes.
     std::set<int> unvisited;    //Set of unvisited nodes.
@@ -214,15 +241,6 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
     distance[src] = 0;
     predecessor[src] = -1;
 
-    /*
-    std::vector<int> distance(mapGraph.size(), INT_MAX);
-    distance.at(src) = 0;
-
-    std::vector<int> predecessor(mapGraph.size(), src);
-    predecessor.at(src) = -1;
-    */
-
-
     //Start from src vertex
     unvisited.erase(src);
     visited.insert(src);
@@ -231,9 +249,10 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
         distance[p.first] = p.second;
     }
 
+    //Individual Timer Start
+    //auto preAdd = std::chrono::high_resolution_clock::now();
 
     //While there are nodes left unvisited:
-    auto preAdd = std::chrono::high_resolution_clock::now();
     int counter = 0;
     while(!unvisited.empty())
     {
@@ -252,9 +271,7 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
         visited.insert(curr);
 
         //For all adjacent nodes
-        //std::cout << "HI " << curr;
         auto adj = mapGraph.at(curr);
-        //std::cout << "| BYE " << curr << std::endl;
         for(std::pair<int, int> p : adj)
         {
             if(unvisited.count(p.first) != 0)
@@ -270,6 +287,7 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
                 }
             }
         }
+        //Individual Timer End
         /*
         if(counter%1 == 0)
         {
@@ -290,11 +308,17 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
     return make_pair(distance, predecessor);
 }
 
-
+/***
+ * Purpose: Performs Breadth First Search to generates a set of all vertices to find all vertices 
+ *          that are x degrees/edges away from the source vertex.
+ * Parameters:  int src - Source vertex
+ *              int degs - Number of degrees/edges an included vertex can be from the source
+ * Return:      The generated subset of vertices.  
+ ***/
 std::set<int> Graph::subset(int src, int degs)
 {
     //Timer Start
-    auto start = std::chrono::high_resolution_clock::now();
+    //auto start = std::chrono::high_resolution_clock::now();
 
     std::set<int> set;
     std::queue<int> q;
@@ -313,8 +337,7 @@ std::set<int> Graph::subset(int src, int degs)
     std::set<int> tempSet;
     while(!q.empty())
     {
-        //get/pop the front of the queue.
- 
+        //get+pop the front of the queue.
         int curr = q.front();
         std::vector<std::pair<int,int>> neighbors = mapGraph[curr];
 
@@ -322,7 +345,6 @@ std::set<int> Graph::subset(int src, int degs)
         currLvlCount--;
 
         //push all unique adj. vertices into the queue
-        
         for(int i = 0; i < neighbors.size(); i++)
         {
             int vertex = neighbors[i].first;

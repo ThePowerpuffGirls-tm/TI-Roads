@@ -1,11 +1,10 @@
-#include<iostream>
-#include<iomanip>
-#include<fstream>
-#include<string>
-#include<stdlib.h>
-#include<chrono>
-#include<stack>
-#include"graph.h"
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <chrono>
+#include <string>
+#include <stack>
+#include "graph.h"
 
 void readFile(Graph& graph,  std::string& filename);
 void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>& output, int from, int to, int degs);
@@ -27,7 +26,6 @@ int main()
 
     while(selection != 0)
     {
-
         std::cout << "Please select an algorithm" << std::endl;
         std::cout << "1. Dijkstra's Algorithm" << std::endl;
         std::cout << "2. Bellman-Ford Algorithm" << std::endl;
@@ -114,13 +112,11 @@ int main()
             std::cout << "]" << std::endl;
             std::cout << "-----------------------------------------------------------------------------------------------------------------------\n" << std::endl;
         }
-        else
+        else //else
         {
-            std::cout << "Invalid selection" << std::endl;
+            std::cout << "Invalid selection\n\n" << std::endl;
         }
 
-        //whitespace/formatting
-        
 
     }
     
@@ -185,6 +181,8 @@ void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int,
     std::unordered_map<int, int> predecessors = output.second;
     std::stack<int> stack;
     std::cout << "\n-----------------------------------------------------------------------------------------------------------------------" << std::endl;
+    
+    //If we can immediately tell there's no path
     if(distances[to] == 0 || distances[to] == INT_MAX)
     {
         std::cout << "No path was between " << from << " and " << to << " within \'" << degs << "\' degrees" << std::endl;
@@ -192,18 +190,18 @@ void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int,
         return;
     }
 
-
+    //otherwise, start from the end and work to the front
     stack.push(to);
     int parent = predecessors[to];
 
+    //Add until there's no predecessor
     while(parent != -1)
     {
-        //std::cout << "pushed: " << parent << " | ";
         stack.push(parent);
         parent = predecessors[parent];
-        //std::cout << "Next up: " << parent << std::endl;
     }
     
+    //Redundant "no-path" check just in case 
     if(stack.top() != from)
     {
         std::cout << "No path was between " << from << " and " << to << " within \'" << degs << "\' degrees" << std::endl;
@@ -213,14 +211,13 @@ void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int,
         std::cout << "Shortest path from " << from << " to " << to << ": " << std::endl;
         int curr, next, distance;
 
+        //Print all the edges traversed
         while(stack.size() > 1)
         {
             curr = stack.top();
             stack.pop();
-            //std::cout << "Size of stack: " << stack.size() << std::endl;
             next = stack.top();
-            distance = distances[next] - distances[curr];
-            //std::cout << "Next: " << distances[next] << " | Curr: " << distances[curr] << std::endl;
+            distance = distances[next] - distances[curr]; //Find the length of this single edge
             std::cout << "Direction:\t" << curr << "\tto\t" << next << "\t(" << distance << " feet)" << std::endl;
         }
         std::cout << "\nEnd of path\n" << std::endl;
