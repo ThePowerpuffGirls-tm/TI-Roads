@@ -15,8 +15,9 @@ int main()
     readFile(graph, filename);
 
     int selection = -1;
-    int from, to;
-    std::vector<int> distances;
+    int from, to, degs;
+    std::vector<int> dijkDist;
+    std::unordered_map<int, int> bfDist;
     while(selection != 0)
     {
 
@@ -29,18 +30,23 @@ int main()
         {
             std::cout << "Starting Vertex: ";
             std::cin >> from;
+            std::cout << "Degrees from Source: ";
+            std::cin >> degs;
             std::cout << "Destination Vertex: ";
             std::cin >> to;
-            distances = graph.dijkstra(from);
+            dijkDist = graph.dijkstra(from, degs);
+            std::cout << dijkDist[to] << std::endl;
         }
         else if(selection == 2) //run bellman-ford
         {
             std::cout << "Starting Vertex: ";
             std::cin >> from;
+            std::cout << "Degrees from Source: ";
+            std::cin >> degs;
             std::cout << "Destination Vertex: ";
             std::cin >> to;
-            distances = graph.bellmanFord(from);
-            std::cout << distances[to] << std::endl;
+            bfDist = graph.bellmanFord(from, degs);
+            std::cout << bfDist[to] << std::endl;
         }
         else if(selection == 0) //End program
         {
@@ -54,11 +60,13 @@ int main()
             std::cout << "Max Degrees Away: ";
             std::cin >> to;
             std::set<int> set = graph.subset(from, to);
+            /*
             for(int i : set)
             {
                 std::cout << i << ", ";
             }
             std::cout << std::endl;
+            */
         }
 
         //whitespace/formatting

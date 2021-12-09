@@ -35,8 +35,8 @@ class Graph
     std::set<int> subset(int src, int degs);
 
     // Shortest s-t path
-    std::vector<int> dijkstra(int src);
-    std::vector<int> bellmanFord(int src);
+    std::vector<int> dijkstra(int src, int degs);
+    std::unordered_map<int, int>  bellmanFord(int src, int degs);
 
     //Misc.
     void vertexCorrection(int largestID);
@@ -122,17 +122,44 @@ std::vector<std::pair<int, int>> Graph::getAdjacent(int vertex)
     return mapGraph[vertex];
 }
 
-std::vector<int> Graph::bellmanFord(int src)
+std::unordered_map<int, int>  Graph::bellmanFord(int src, int degs)
 {
     //Timer Start
     auto start = std::chrono::high_resolution_clock::now();
 
     // Step 1 - declare distance and parent arrays and initialize elements accordingly
+    std::unordered_map<int, int> distance;
+    std::unordered_map<int, int> parent;
+    std::set<int> sub = subset(src, degs); 
+    for(int i : sub)
+    {   
+        distance[i] = INT_MAX;
+        parent[i] = -1;
+    }
+    distance[src] = 0;
+
+/*
     std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance[src] = 0;
     std::vector<int> parent(mapGraph.size(), -1);
-    
+*/    
     // Step 2 - relax all edges |V| - 1 times
+    for (int i = 0; i < sub.size() - 1; i++)
+    {
+        for (int i : sub)
+        {
+            std::vector<std::pair<int, int>> vector = mapGraph[i];
+            for (std::pair<int, int> k : vector)
+            {
+                if (distance[i] != INT_MAX && distance[i] + k.second < distance[k.first])
+                {
+                    distance[k.first] = distance[i] + k.second;
+                    parent[k.first] = i;
+                }
+            }
+        }
+    }
+    /*
     for (int i = 0; i < numVertices - 1; i++)
     {
         for (auto j : mapGraph)
@@ -147,6 +174,7 @@ std::vector<int> Graph::bellmanFord(int src)
             }
         }
     }
+    */
 
     // Skip step 3 since there are no negative weights in the graph
 
@@ -162,7 +190,7 @@ std::vector<int> Graph::bellmanFord(int src)
     Uses Dijkstra's shortest path algorithm
             Sources: Aman's Lecture Slides
                      https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/ */
-std::vector<int> Graph::dijkstra(int src)
+std::vector<int> Graph::dijkstra(int src, int degs)
 {
     //Timer Start
     auto start = std::chrono::high_resolution_clock::now();
@@ -171,8 +199,7 @@ std::vector<int> Graph::dijkstra(int src)
     std::set<int> unvisited;    //Set of unvisited nodes.
 
     //All nodes initialized as unvisited.
-    for(auto p : mapGraph)
-        unvisited.insert(p.first);
+    unvisited = subset(src, degs);
 
     //Distance initialized as 0 for src, and infinity for the rest.
     std::vector<int> distance(mapGraph.size(), INT_MAX);
@@ -228,13 +255,15 @@ std::vector<int> Graph::dijkstra(int src)
                 }
             }
         }
-        if(counter%10 == 0)
+        /*
+        if(counter%1 == 0)
         {
             auto postAdd = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
-            std::cout << "Adding 10 vertices: " << duration.count() << "ms" << std::endl;
+            std::cout << "Adding 1 vertices: " << duration.count() << "ms" << std::endl;
             preAdd = std::chrono::high_resolution_clock::now();
         }
+        */
     }
 
     //Timer End
@@ -249,6 +278,9 @@ std::vector<int> Graph::dijkstra(int src)
 
 std::set<int> Graph::subset(int src, int degs)
 {
+    //Timer Start
+    auto start = std::chrono::high_resolution_clock::now();
+
     std::set<int> set;
     std::queue<int> q;
 
@@ -260,10 +292,12 @@ std::set<int> Graph::subset(int src, int degs)
     int nextLvlCount = 0;   //Tracks how many vertices will be considered in the next level of BFS
     int currLvl = 0;        //Tracks how many degrees away from the source we're currently at
   
+    auto preAdd = std::chrono::high_resolution_clock::now();
+    std::set<int> tempSet;
     while(!q.empty())
     {
         //get/pop the front of the queue.
-        std::set<int> tempSet;
+ 
         int curr = q.front();
         std::vector<std::pair<int,int>> neighbors = mapGraph[curr];
 
@@ -275,15 +309,21 @@ std::set<int> Graph::subset(int src, int degs)
         for(int i = 0; i < neighbors.size(); i++)
         {
             int vertex = neighbors[i].first;
-
+            //td::cout << "Pushing: "<< vertex << " | ";
             //If we haven't reached this vertex yet, add it to the queue and set
-            if(!set.count(vertex) && !tempSet.count(vertex)) 
+            if(!set.count(vertex))//&& !tempSet.count(vertex) 
             {
                 q.push(vertex);
                 tempSet.insert(vertex);
                 nextLvlCount++;
             }
+            else
+            {
+                //std::cout << vertex << " is already in" << std::endl;
+            }
+            //std::cout << std::endl;
         }
+
 
         //If we've traversed all vertices on this level, move to the next level
         if(currLvlCount == 0)
@@ -299,13 +339,26 @@ std::set<int> Graph::subset(int src, int degs)
                 std::set<int> uniSet;
                 set_union(set.begin(), set.end(), tempSet.begin(), tempSet.end(), std::inserter(uniSet, uniSet.begin()));
                 set.swap(uniSet);
+                tempSet.clear();
             }
             else
             {
                 break;   
             }
+            
+            auto postAdd = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
+            std::cout << "Adding Level " << currLvl << ": " << duration.count() << "ms" << std::endl;
+            preAdd = std::chrono::high_resolution_clock::now();
+            
         }
+
     }
+
+    //Timer End
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "Time to run subset: " << duration.count() << "ms" << std::endl;
 
     return set;
 }
