@@ -128,13 +128,22 @@ void printOutput(std::pair<std::unordered_map<int, int>, std::unordered_map<int,
     std::unordered_map<int, int> predecessors = output.second;
     std::stack<int> stack;
 
+    if(distances[to] == 0 || distances[to] == INT_MAX)
+    {
+        std::cout << "No path between " << from << " and " << to << std::endl;
+        return;
+    }
+
+
     stack.push(to);
     int parent = predecessors[to];
+
     while(parent != -1)
     {
-        std::cout << "pushed: " << parent << std::endl;
+        //std::cout << "pushed: " << parent << " | ";
         stack.push(parent);
         parent = predecessors[parent];
+        //std::cout << "Next up: " << parent << std::endl;
     }
     
     if(stack.top() != from)

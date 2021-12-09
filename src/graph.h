@@ -146,15 +146,15 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>>  Graph::be
     // Step 2 - relax all edges |V| - 1 times
     for (int i = 0; i < sub.size() - 1; i++)
     {
-        for (int i : sub)
+        for (int vertex : sub)
         {
-            std::vector<std::pair<int, int>> vector = mapGraph[i];
+            std::vector<std::pair<int, int>> vector = mapGraph[vertex];
             for (std::pair<int, int> k : vector)
             {
-                if (distance[i] != INT_MAX && distance[i] + k.second < distance[k.first])     
+                if (distance[vertex] != INT_MAX && distance[vertex] + k.second < distance[k.first])     
                 {
-                    distance[k.first] = distance[i] + k.second;
-                    parent[k.first] = i;
+                    distance[k.first] = distance[vertex] + k.second;
+                    parent[k.first] = vertex;
                 }
             }
         }
@@ -208,7 +208,7 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
     for(int i : unvisited)
     {   
         distance[i] = INT_MAX;
-        predecessor[i] = -1;
+        predecessor[i] = src;
     }
     distance[src] = 0;
     predecessor[src] = -1;
