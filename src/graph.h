@@ -13,7 +13,6 @@ class Graph
 {
     private: 
     // Storage for edges and vertices, adjancency list implementation
-
     std::unordered_map<int, std::vector<std::pair<int, int>>> mapGraph; //Represents a weighted, undirected graph
     int numVertices;
     int numEdges;
@@ -262,7 +261,7 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
         for(int i : unvisited)
         {
             //Check distance values
-            if(distance.at(i) < distance.at(curr))
+            if(distance[i] < distance[curr])
                 curr = i;          //Update distance if there exists a smaller distance
         }
 
@@ -271,19 +270,19 @@ std::pair<std::unordered_map<int, int>, std::unordered_map<int, int>> Graph::dij
         visited.insert(curr);
 
         //For all adjacent nodes
-        auto adj = mapGraph.at(curr);
+        auto adj = mapGraph[curr];
         for(std::pair<int, int> p : adj)
         {
             if(unvisited.count(p.first) != 0)
             {
                 //Check distance
-                int currDistance = distance.at(curr) + p.second;
+                int currDistance = distance[curr] + p.second;
 
                 //Perform relaxation if necessary
-                if(distance.at(p.first) > currDistance)
+                if(distance[p.first] > currDistance)
                 {
-                    distance.at(p.first) = currDistance;
-                    predecessor.at(p.first) = curr;
+                    distance[p.first] = currDistance;
+                    predecessor[p.first] = curr;
                 }
             }
         }
@@ -348,19 +347,13 @@ std::set<int> Graph::subset(int src, int degs)
         for(int i = 0; i < neighbors.size(); i++)
         {
             int vertex = neighbors[i].first;
-            //td::cout << "Pushing: "<< vertex << " | ";
             //If we haven't reached this vertex yet, add it to the queue and set
-            if(!set.count(vertex))//&& !tempSet.count(vertex) 
+            if(!set.count(vertex))  //&& !tempSet.count(vertex)  {Do we need this?}
             {
                 q.push(vertex);
                 tempSet.insert(vertex);
                 nextLvlCount++;
             }
-            else
-            {
-                //std::cout << vertex << " is already in" << std::endl;
-            }
-            //std::cout << std::endl;
         }
 
 
