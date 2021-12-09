@@ -61,12 +61,12 @@ int Graph::E()  { return this->numEdges;    }
 void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
 {
     //Whether or not vertex 'from' already exists, push_back create the vector or add to an existing vector
-    if(!mapGraph.count(from))       //Vertex does not exist.
+    if(mapGraph[from].size() == 0)       //Vertex does not exist.
         numVertices++;
     mapGraph[from].push_back(std::make_pair(to, weight));
 
     //Create another edge from 'to' to 'from'
-    if(!mapGraph.count(to))         //Other vertex does not exist.
+    if(mapGraph[to].size() == 0)         //Other vertex does not exist.
         numVertices++;
     mapGraph[to].push_back(std::make_pair(from, weight)); 
 
@@ -102,10 +102,11 @@ std::vector<int> Graph::bellmanFord(int src)
     std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance[src] = 0;
     std::vector<int> parent(mapGraph.size(), -1);
-
+    
     // Step 2 - relax all edges |V| - 1 times
     for (int i = 0; i < numVertices - 1; i++)
     {
+        
         for (std::pair<int, int> j : mapGraph[i])
         {
             if (distance[i] != INT_MAX && distance[i] + j.second < distance[j.first])
@@ -121,8 +122,8 @@ std::vector<int> Graph::bellmanFord(int src)
     //Timer End
     
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-    std::cout << duration.count() << std::endl;
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "Time to run: " <<  duration.count() << "ms" << std::endl;
     
     return distance;
 }
@@ -147,16 +148,28 @@ std::vector<int> Graph::dijkstra(int src)
     std::vector<int> distance(mapGraph.size(), INT_MAX);
     distance.at(src) = 0;
 
+    std::vector<int> predecessor(mapGraph.size(), src);
+    predecessor.at(src) = -1;
+
+    //Start from src vertex
+    unvisited.erase(src);
+    visited.insert(src);
+    for(std::pair<int, int> p : mapGraph[src])
+    {
+        distance[p.first] = p.second;
+    }
+
+
     //While there are nodes left unvisited:
     while(!unvisited.empty())
     {
         //For all unvisited nodes, find the smallest distance
-        int curr = *unvisited.begin();
-        for(auto i = unvisited.begin(); i != unvisited.end(); i++)
+        int curr = *(unvisited.begin());
+        for(int i : unvisited)
         {
             //Check distance values
-            if(distance.at(*i) < distance.at(curr))
-                curr = *i;          //Update distance if there exists a smaller distance
+            if(distance.at(i) < distance.at(curr))
+                curr = i;          //Update distance if there exists a smaller distance
         }
 
         //Mark the unvisited node as visited
@@ -164,23 +177,30 @@ std::vector<int> Graph::dijkstra(int src)
         visited.insert(curr);
 
         //For all adjacent nodes
+        //std::cout << "HI" << std::endl;
         auto adj = mapGraph.at(curr);
         for(std::pair<int, int> p : adj)
         {
-            //Check distance
-            int currDistance = distance.at(curr) + p.second;
+            if(unvisited.count(p.first) != 0)
+            {
+                //Check distance
+                int currDistance = distance.at(curr) + p.second;
 
-            //Perform relaxation if necessary
-            if(distance.at(p.first) > currDistance)
-                distance.at(p.first) = currDistance;
+                //Perform relaxation if necessary
+                if(distance.at(p.first) > currDistance)
+                {
+                    distance.at(p.first) = currDistance;
+                    predecessor.at(p.first) = curr;
+                }
+            }
         }
     }
 
     //Timer End
     
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-    std::cout << duration.count() << std::endl;
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "Time to run: " << duration.count() << "ms" << std::endl;
     
     return distance;
 }
