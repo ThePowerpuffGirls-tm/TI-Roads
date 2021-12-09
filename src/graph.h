@@ -130,13 +130,15 @@ std::vector<int> Graph::bellmanFord(int src)
     // Step 2 - relax all edges |V| - 1 times
     for (int i = 0; i < numVertices - 1; i++)
     {
-        
-        for (std::pair<int, int> j : mapGraph[i])
+        for (auto j : mapGraph)
         {
-            if (distance[i] != INT_MAX && distance[i] + j.second < distance[j.first])
+            for (std::pair<int, int> k : j.second)
             {
-                distance[j.first] = distance[i] + j.second;
-                parent[j.first] = i;
+                if (distance[j.first] != INT_MAX && distance[j.first] + k.second < distance[k.first])
+                {
+                    distance[k.first] = distance[j.first] + k.second;
+                    parent[k.first] = j.first;
+                }
             }
         }
     }
