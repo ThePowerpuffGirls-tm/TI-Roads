@@ -28,10 +28,13 @@ class Graph
     void insertEdge(int from, int to, int weight);                                              //Check?
     bool isEdge(int from, int to);                                                              //Check?
     std::vector<std::pair<int, int>> getAdjacent(int vertex);                                   //Check?
-
+    
     // Shortest s-t path
     std::vector<int> dijkstra(int src);
     std::vector<int> bellmanFord(int src);
+
+    //Misc.
+    void vertexCorrection(int largestID);
 };
 
 Graph::Graph()
@@ -56,6 +59,27 @@ int Graph::V()  { return this->numVertices; }
 
 //Returns the number of edges
 int Graph::E()  { return this->numEdges;    }  
+
+void Graph::vertexCorrection(int largestID)
+{
+    std::vector<int> extraVertices;
+    for(int i = 0; i < largestID; i++)
+    {
+        if(mapGraph[i].size() == 0)
+        {
+            extraVertices.push_back(i);
+        }
+    }
+
+    int rngWeight;
+    for(int i = 0; i<extraVertices.size(); i++)
+    {
+        rngWeight = rand()%1584+2113;
+        insertEdge(i, (i+1)%extraVertices.size(), rngWeight);
+    }
+
+
+}
 
 //Creates an edge between two vertices, inserts vertex if it does not already exist.
 void Graph::insertEdge(int from, int to, int weight)    //Currently a undirected map, roads can go both ways
@@ -141,8 +165,8 @@ std::vector<int> Graph::dijkstra(int src)
     std::set<int> unvisited;    //Set of unvisited nodes.
 
     //All nodes initialized as unvisited.
-    for(int i = 0; i < mapGraph.size(); i++)
-        unvisited.insert(i);
+    for(auto p : mapGraph)
+        unvisited.insert(p.first);
 
     //Distance initialized as 0 for src, and infinity for the rest.
     std::vector<int> distance(mapGraph.size(), INT_MAX);
@@ -161,8 +185,11 @@ std::vector<int> Graph::dijkstra(int src)
 
 
     //While there are nodes left unvisited:
+    auto preAdd = std::chrono::high_resolution_clock::now();
+    int counter = 0;
     while(!unvisited.empty())
     {
+        counter++;  
         //For all unvisited nodes, find the smallest distance
         int curr = *(unvisited.begin());
         for(int i : unvisited)
@@ -177,8 +204,9 @@ std::vector<int> Graph::dijkstra(int src)
         visited.insert(curr);
 
         //For all adjacent nodes
-        //std::cout << "HI" << std::endl;
+        //std::cout << "HI " << curr;
         auto adj = mapGraph.at(curr);
+        //std::cout << "| BYE " << curr << std::endl;
         for(std::pair<int, int> p : adj)
         {
             if(unvisited.count(p.first) != 0)
@@ -193,6 +221,13 @@ std::vector<int> Graph::dijkstra(int src)
                     predecessor.at(p.first) = curr;
                 }
             }
+        }
+        if(counter%10000 == 0)
+        {
+            auto postAdd = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(postAdd - preAdd);
+            std::cout << "Adding 10000 vertices: " << duration.count() << "ms" << std::endl;
+            preAdd = std::chrono::high_resolution_clock::now();
         }
     }
 

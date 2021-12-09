@@ -71,6 +71,7 @@ void readFile(Graph& graph, std::string& filename)
 
     int from, to, space;
     int rngWeight;
+    int largest = 0;
     while(std::getline(reader, newLine))
     {
         rngWeight = rand()%1584+2113;
@@ -81,7 +82,19 @@ void readFile(Graph& graph, std::string& filename)
         {
             graph.insertEdge(from, to, rngWeight);
         }
+
+        if(from > largest)
+        {
+            largest = from;
+        }
+        if(to > largest)
+        {
+            largest = to;
+        }
     }
+
+    graph.vertexCorrection(largest);
+    //std::cout << "largest ID: " << largest << std::endl;
     //auto stop = std::chrono::high_resolution_clock::now();
     //auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
     //std::cout << "Time to run: " << duration.count() << "s" <<std::endl;
